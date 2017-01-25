@@ -1,0 +1,7 @@
+## make bkg and data preparation
+## set the CMSSW_BASE to CMSSW_7_1_5
+cd $CMSSW_BASE/src
+cmsenv
+cd -
+## in runbkg.sh change the category, final state you want, right now is inclusive 4e onshell
+source runbkg.sh
