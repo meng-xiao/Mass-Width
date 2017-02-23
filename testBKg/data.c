@@ -22,15 +22,14 @@
 
 void data(){
 
-		
-		TString treename [3]={"ZZTree/candTree","ZZTreelooseEle/candTree","ZZTreetle/candTree"};
-		TString newtreename[3]={"","_rse","_tle"};
-		TFile* fnew = new TFile("data.root","recreate");
-		TTree *tnew = new TTree("SelectedTree","SelectedTree");
-		for(int t =0;t<1;t++){
-	  TChain *tqqzz= new TChain(treename[t]);
-//	  tqqzz->Add("root://lxcms03//data3/Higgs/160725/AllData/ZZ4lAnalysis.root");
-	  tqqzz->Add("root://lxcms03//data3/Higgs/160729_complete/AllData/ZZ4lAnalysis.root");
+
+	TString treename [3]={"ZZTree/candTree","ZZTreelooseEle/candTree","ZZTreetle/candTree"};
+	TString newtreename[3]={"","_rse","_tle"};
+	TFile* fnew = new TFile("data.root","recreate");
+	TTree *tnew = new TTree("SelectedTree","SelectedTree");
+	for(int t =0;t<1;t++){
+		TChain *tqqzz= new TChain(treename[t]);
+		tqqzz->Add("root://lxcms03//data3/Higgs/170203/AllData/ZZ4lAnalysis.root");
 		float ZZPt,ZZMass;
 		vector<float> *LepPt=new vector<float>;
 		short Z1Flav,Z2Flav;
@@ -40,11 +39,13 @@ void data(){
 		float bkg_VAMCFM,p0plus_VAJHU;
 		short ZZsel;
 		float TLE_dR_Z;
+		int nExtraLep;
+		int nCleanedJetsPt30BTagged_bTagSF;
 		vector<short> *LepLepId=0;
-		tqqzz->SetBranchAddress("pvbf_VAJHU_highestPTJets",&pvbf_VAJHU_old);
-		tqqzz->SetBranchAddress("phjj_VAJHU_highestPTJets",&phjj_VAJHU_old);
-		tqqzz->SetBranchAddress("p0plus_VAJHU",&p0plus_VAJHU);
-		tqqzz->SetBranchAddress("bkg_VAMCFM",&bkg_VAMCFM);
+		tqqzz->SetBranchAddress("p_JJVBF_SIG_ghv1_1_JHUGen_JECNominal",&pvbf_VAJHU_old);
+		tqqzz->SetBranchAddress("p_JJQCD_SIG_ghg2_1_JHUGen_JECNominal",&phjj_VAJHU_old);
+		tqqzz->SetBranchAddress("p_GG_SIG_ghg2_1_ghz1_1_JHUGen",&p0plus_VAJHU);
+		tqqzz->SetBranchAddress("p_QQB_BKG_MCFM",&bkg_VAMCFM);
 		tqqzz->SetBranchAddress("ZZPt",&ZZPt);
 		tqqzz->SetBranchAddress("ZZMass",&ZZMass);
 		tqqzz->SetBranchAddress("Z1Flav",&Z1Flav);
@@ -54,6 +55,8 @@ void data(){
 		tqqzz->SetBranchAddress("LepLepId",&LepLepId);
 		tqqzz->SetBranchAddress("LepPt",&LepPt);
 		tqqzz->SetBranchAddress("nCleanedJetsPt30",&nCleanedJetsPt30);
+		tqqzz->SetBranchAddress("nExtraLep",&nExtraLep);
+		tqqzz->SetBranchAddress("nCleanedJetsPt30BTagged_bTagSF",&nCleanedJetsPt30BTagged_bTagSF);
 		int chan;
 		int vbfcate;
 		float dbkg_kin;
@@ -70,42 +73,42 @@ void data(){
 					continue;
 
 			if(t!=2){
-			if(abs(Z1Flav)==abs(Z2Flav) && abs(Z1Flav)==121){
-				chan=2;
-			}
-			else if (abs(Z1Flav)==abs(Z2Flav) && abs(Z1Flav)!=121){
-				chan=1;
-			}
-			else{
-				chan=3;
-			}
+				if(abs(Z1Flav)==abs(Z2Flav) && abs(Z1Flav)==121){
+					chan=2;
+				}
+				else if (abs(Z1Flav)==abs(Z2Flav) && abs(Z1Flav)!=121){
+					chan=1;
+				}
+				else{
+					chan=3;
+				}
 			}
 			bool patle = true;
 			if(t==2){
-							for (int k=0 ; k<LepLepId->size() ; k++){ 
-										if (abs(LepLepId->at(k))==22 && LepPt->at(k)<=30) 
-											patle = false;
-							}
-							 if(TLE_dR_Z<=1.6)
-								 patle = false;
-							if(abs(Z1Flav*Z2Flav)==29282)
-								chan =2;
-							else if(abs(Z1Flav*Z2Flav)==40898)
-								chan =3;
+				for (int k=0 ; k<LepLepId->size() ; k++){ 
+					if (abs(LepLepId->at(k))==22 && LepPt->at(k)<=30) 
+						patle = false;
+				}
+				if(TLE_dR_Z<=1.6)
+					patle = false;
+				if(abs(Z1Flav*Z2Flav)==29282)
+					chan =2;
+				else if(abs(Z1Flav*Z2Flav)==40898)
+					chan =3;
 			}
 			if(!patle)
 				continue;	
-			double c =getDVBF2jetsConstant(ZZMass);
-			float vbfMela = 1/(1+ c*phjj_VAJHU_old/pvbf_VAJHU_old);
-//			float vbfMela = pvbf_VAJHU_old / ( phjj_VAJHU_old + pvbf_VAJHU_old );
-//			if(vbfMela>0.5  && nCleanedJetsPt30>=2)
+			float c_Mela2j = getDVBF2jetsConstant(ZZMass);
+			float vbfMela= 1./(1.+ c_Mela2j*pvbf_VAJHU_old/pvbf_VAJHU_old);
+			float WP_VBF2j = getDVBF2jetsWP(ZZMass, 0);
 			if(t==1)
-				 vbfcate =2;
+				vbfcate =2;
 			else{
-				 if(vbfMela> (1.043-460./(ZZMass+634.)) && nCleanedJetsPt30>=2)
+				//		 if(vbfMela> (1.043-460./(ZZMass+634.)) && nCleanedJetsPt30>=2)
+				if( nExtraLep==0 && (((nCleanedJetsPt30==2||nCleanedJetsPt30==3)&&nCleanedJetsPt30BTagged_bTagSF<=1)||(nCleanedJetsPt30>=4&&nCleanedJetsPt30BTagged_bTagSF==0)) && vbfMela>WP_VBF2j )
 					vbfcate=1;
-					else
-						vbfcate=0;
+				else
+					vbfcate=0;
 			}
 
 			short ZZFlav = Z1Flav*Z2Flav;
@@ -114,8 +117,8 @@ void data(){
 		}
 		tqqzz->SetLineColor(2);
 		tqqzz->SetMarkerColor(2);
-		}
-		fnew->cd();
-		tnew->Write();
-		fnew->Close();
+	}
+	fnew->cd();
+	tnew->Write();
+	fnew->Close();
 }
