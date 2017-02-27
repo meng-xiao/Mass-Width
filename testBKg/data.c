@@ -27,9 +27,10 @@ void data(){
 	TString newtreename[3]={"","_rse","_tle"};
 	TFile* fnew = new TFile("data.root","recreate");
 	TTree *tnew = new TTree("SelectedTree","SelectedTree");
+	int count=0;
 	for(int t =0;t<1;t++){
 		TChain *tqqzz= new TChain(treename[t]);
-		tqqzz->Add("root://lxcms03//data3/Higgs/170203/AllData/ZZ4lAnalysis.root");
+		tqqzz->Add("root://lxcms03//data3/Higgs/170222/AllData/ZZ4lAnalysis.root");
 		float ZZPt,ZZMass;
 		vector<float> *LepPt=new vector<float>;
 		short Z1Flav,Z2Flav;
@@ -39,8 +40,8 @@ void data(){
 		float bkg_VAMCFM,p0plus_VAJHU;
 		short ZZsel;
 		float TLE_dR_Z;
-		int nExtraLep;
-		int nCleanedJetsPt30BTagged_bTagSF;
+		short nExtraLep;
+		short nCleanedJetsPt30BTagged_bTagSF;
 		vector<short> *LepLepId=0;
 		tqqzz->SetBranchAddress("p_JJVBF_SIG_ghv1_1_JHUGen_JECNominal",&pvbf_VAJHU_old);
 		tqqzz->SetBranchAddress("p_JJQCD_SIG_ghg2_1_JHUGen_JECNominal",&phjj_VAJHU_old);
@@ -99,14 +100,19 @@ void data(){
 			if(!patle)
 				continue;	
 			float c_Mela2j = getDVBF2jetsConstant(ZZMass);
-			float vbfMela= 1./(1.+ c_Mela2j*pvbf_VAJHU_old/pvbf_VAJHU_old);
+			float vbfMela= 1./(1.+ c_Mela2j*phjj_VAJHU_old/pvbf_VAJHU_old);
 			float WP_VBF2j = getDVBF2jetsWP(ZZMass, 0);
 			if(t==1)
 				vbfcate =2;
 			else{
+				//cout<< vbfMela<<"\t"<<WP_VBF2j<< "\t"<<nCleanedJetsPt30<<"\t"<<nExtraLep<<"\t"<<nCleanedJetsPt30BTagged_bTagSF<<endl;
 				//		 if(vbfMela> (1.043-460./(ZZMass+634.)) && nCleanedJetsPt30>=2)
-				if( nExtraLep==0 && (((nCleanedJetsPt30==2||nCleanedJetsPt30==3)&&nCleanedJetsPt30BTagged_bTagSF<=1)||(nCleanedJetsPt30>=4&&nCleanedJetsPt30BTagged_bTagSF==0)) && vbfMela>WP_VBF2j )
+				if( nExtraLep==0 && (((nCleanedJetsPt30==2||nCleanedJetsPt30==3)&&nCleanedJetsPt30BTagged_bTagSF<=1)||(nCleanedJetsPt30>=4&&nCleanedJetsPt30BTagged_bTagSF==0)) && vbfMela>WP_VBF2j ){
 					vbfcate=1;
+					if(ZZMass>118&&ZZMass<130)
+						count++;
+				}
+
 				else
 					vbfcate=0;
 			}
@@ -121,4 +127,5 @@ void data(){
 	fnew->cd();
 	tnew->Write();
 	fnew->Close();
+	cout<<count<<endl;
 }
