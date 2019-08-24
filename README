@@ -7,6 +7,9 @@ git checkout slc6-root5.34.17
 cd $CMSSW_BASE/src
 scram b -j8
 
+git clone https://github.com/meng-xiao/Mass-Width.git
+cd Mass-Width
+
 ## put clean.c file somewhere in the release
 mkdir workspace125_onshell
 ## parameters for clean.c
