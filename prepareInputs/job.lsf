@@ -1,7 +1,8 @@
 #!/bin/bash
-workdir=$CMSSW_BASE/src/prepareInputs
-cd $CMSSW_BASE/src
-eval `scramv1 runtime -sh`
-cd $workdir
-root -q -b "clean.c(\"$1\",$2,$3)"
-root -q -b "vbf.c(\"$1\",$2,$3)"
+#workdir=$CMSSW_BASE/src/prepareInputs
+#cd $CMSSW_BASE/src
+#eval `scramv1 runtime -sh`
+#cd $workdir
+root -q -b "simpleVersion.c(\"$1\",$2,$3)"
+#root -q -b "clean.c(\"$1\",$2,$3)"
+#root -q -b "vbf.c(\"$1\",$2,$3)"
